@@ -1,0 +1,37 @@
+- hosts: allserver
+  vars:
+     - image: ridhos9/web-nginx 
+  tasks:
+     - name: install python module docker
+       apt:
+           name: "{{ item }}"
+           state: present
+       loop:
+           - python3
+           - python3-docker
+       when: ansible_facts['os_family'] == "Debian"
+     - name: install python module docker
+       yum:
+           name: "{{ item }}"
+           state: present
+       loop:
+           - python3
+           - python3-docker
+       when: ansible_facts['os_family'] == "RedHat"
+
+     - name: pull image
+       docker_image:
+           name: "{{ image }}"
+           state: present
+           force: yes
+
+     - name: create containers
+       docker_container:
+           name: docker-ansible
+           image: "{{ image }}"
+           state: started
+           published_ports:
+           - 10000:80
+           recreate: yes
+     
+
